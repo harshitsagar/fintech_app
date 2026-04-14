@@ -58,7 +58,7 @@ For this project, **GetX** was chosen as the state management solution for the f
 ### Installation Steps
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/harshitsagar/fintech_app.git
    cd fintech_app
    ```
 
