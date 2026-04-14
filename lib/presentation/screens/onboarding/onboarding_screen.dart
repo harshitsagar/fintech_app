@@ -142,10 +142,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           SizedBox(height: 32.h),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_currentPage == _onboardingData.length - 1) {
-                authController.setOnboardingSeen();
-                context.go('/login');
+                await authController.setOnboardingSeen();
+                if (mounted) context.go('/login');
               } else {
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
@@ -163,9 +163,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           if (_currentPage == _onboardingData.length - 1)
             TextButton(
-              onPressed: () {
-                authController.setOnboardingSeen();
-                context.go('/login');
+              onPressed: () async {
+                await authController.setOnboardingSeen();
+                if (mounted) context.go('/login');
               },
               child: Text(
                 'Skip',

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
@@ -13,34 +14,49 @@ import 'package:fintech_app/presentation/screens/onboarding/onboarding_screen.da
 import 'package:fintech_app/presentation/screens/splash/splash_screen.dart';
 
 class AppRoutes {
+  static final AuthController _authController = Get.find<AuthController>();
+
   static final GoRouter router = GoRouter(
     navigatorKey: Get.key,
     initialLocation: '/splash',
+    refreshListenable: _GoRouterRefreshStream(_authController.isLoggedIn.stream),
     redirect: (context, state) {
-      final AuthController authController = Get.find<AuthController>();
-      final bool isLoggedIn = authController.isLoggedIn.value;
-      final bool hasSeenOnboarding = authController.hasSeenOnboarding.value;
-
-      final bool isAuthRoute = state.matchedLocation.contains('/login') ||
-          state.matchedLocation.contains('/register') ||
-          state.matchedLocation.contains('/forgot-password');
-
-      final bool isSplashRoute = state.matchedLocation.contains('/splash');
-
-      if (isSplashRoute) {
+      if (!_authController.isReady.value) {
         return null;
       }
 
-      if (!hasSeenOnboarding && !isAuthRoute) {
-        return '/onboarding';
+      final bool isLoggedIn = _authController.isLoggedIn.value;
+      final bool hasSeenOnboarding = _authController.hasSeenOnboarding.value;
+
+      final bool isAuthRoute = state.matchedLocation.contains('/login') ||
+          state.matchedLocation.contains('/register') ||
+          state.matchedLocation.contains('/forgot-password') ||
+          state.matchedLocation.contains('/otp-verification') ||
+          state.matchedLocation.contains('/reset-password');
+
+      final bool isOnboardingRoute = state.matchedLocation.contains('/onboarding');
+      final bool isSplashRoute = state.matchedLocation.contains('/splash');
+
+      if (isSplashRoute) return null;
+
+      // 1. Force onboarding if not seen
+      if (!hasSeenOnboarding) {
+        return isOnboardingRoute ? null : '/onboarding';
       }
 
-      if (!isLoggedIn && !isAuthRoute && !state.matchedLocation.contains('/onboarding')) {
-        return '/login';
+      // 2. If onboarding seen, don't allow going back to onboarding
+      if (isOnboardingRoute) {
+        return isLoggedIn ? '/dashboard' : '/login';
       }
 
+      // 3. If logged in, don't allow auth routes
       if (isLoggedIn && isAuthRoute) {
         return '/dashboard';
+      }
+
+      // 4. If not logged in, force auth routes
+      if (!isLoggedIn && !isAuthRoute) {
+        return '/login';
       }
 
       return null;
@@ -96,4 +112,21 @@ class AppRoutes {
       ),
     ],
   );
+}
+
+class _GoRouterRefreshStream extends ChangeNotifier {
+  _GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+          (dynamic _) => notifyListeners(),
+    );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 }

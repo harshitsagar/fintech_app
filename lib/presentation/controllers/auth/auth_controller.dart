@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:fintech_app/core/routes/app_routes.dart';
 import 'package:fintech_app/data/models/user_model.dart';
@@ -7,21 +8,29 @@ import 'package:fintech_app/presentation/controllers/user/user_controller.dart';
 class AuthController extends GetxController {
   final FirebaseService _firebaseService = FirebaseService();
   final UserController userController = Get.put(UserController());
+  static const String _onboardingKey = 'has_seen_onboarding';
 
   var isLoading = false.obs;
   var isLoggedIn = false.obs;
   var hasSeenOnboarding = false.obs;
+  var isReady = false.obs;
   var currentUser = Rxn<UserModel>();
 
   @override
   void onInit() {
     super.onInit();
-    _checkOnboardingStatus();
-    _checkAuthStatus();
+    _init();
   }
 
-  void _checkOnboardingStatus() {
-    hasSeenOnboarding.value = false; // You can implement SharedPreferences here
+  Future<void> _init() async {
+    await _checkOnboardingStatus();
+    _checkAuthStatus();
+    isReady.value = true;
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    hasSeenOnboarding.value = prefs.getBool(_onboardingKey) ?? false;
   }
 
   void _checkAuthStatus() {
@@ -99,7 +108,9 @@ class AuthController extends GetxController {
     Get.snackbar('Success', 'Signed out successfully');
   }
 
-  void setOnboardingSeen() {
+  Future<void> setOnboardingSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingKey, true);
     hasSeenOnboarding.value = true;
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fintech_app/presentation/controllers/auth/auth_controller.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,6 +15,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  final AuthController _authController = Get.find<AuthController>();
 
   @override
   void initState() {
@@ -24,15 +27,27 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
     _animationController.forward();
 
-    // Use WidgetsBinding to ensure navigation happens after build is complete
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          // Use context-based navigation instead of Get.offNamed
-          context.go('/onboarding');
-        }
-      });
-    });
+    _navigateToNext();
+  }
+
+  Future<void> _navigateToNext() async {
+    // Wait for at least 3 seconds for splash effect
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Wait for AuthController to be ready
+    while (!_authController.isReady.value) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    if (!mounted) return;
+
+    if (!_authController.hasSeenOnboarding.value) {
+      context.go('/onboarding');
+    } else if (!_authController.isLoggedIn.value) {
+      context.go('/login');
+    } else {
+      context.go('/dashboard');
+    }
   }
 
   @override
