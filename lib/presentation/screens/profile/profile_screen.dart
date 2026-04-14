@@ -212,25 +212,96 @@ class ProfileScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Get.dialog(
-                    AlertDialog(
-                      title: const Text('Logout'),
-                      content: const Text('Are you sure you want to logout?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => context.pop(),
-                          child: const Text('Cancel'),
+                    Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(24.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(16.w),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.logout_rounded,
+                                color: Colors.red,
+                                size: 32.sp,
+                              ),
+                            ),
+                            SizedBox(height: 24.h),
+                            Text(
+                              'Logout',
+                              style: GoogleFonts.poppins(
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'Are you sure you want to logout? You will need to login again to access your account.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14.sp,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            SizedBox(height: 32.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () => Get.back(),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Cancel',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Get.back();
+                                      authController.signOut();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: Text(
+                                      'Logout',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.pop();
-                            authController.signOut();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          child: const Text('Logout'),
-                        ),
-                      ],
+                      ),
                     ),
                   );
                 },
